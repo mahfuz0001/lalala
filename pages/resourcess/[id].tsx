@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, ScrollView, Pressable, Image } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Pressable,
+  Image,
+} from 'react-native';
 import { ArrowLeft, Share2, BookOpen } from 'lucide-react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
@@ -10,15 +17,19 @@ const MOCK_RESOURCES: ResourceType[] = [
   {
     id: '1',
     title: 'How to Identify Extortion Attempts',
-    description: 'Learn the common signs and tactics used in extortion attempts and how to respond safely.',
-    imageUrl: 'https://images.pexels.com/photos/6964140/pexels-photo-6964140.jpeg',
+    description:
+      'Learn the common signs and tactics used in extortion attempts and how to respond safely.',
+    imageUrl:
+      'https://images.pexels.com/photos/6964140/pexels-photo-6964140.jpeg',
     category: 'Education',
   },
   {
     id: '2',
     title: 'Legal Rights When Facing Extortion',
-    description: 'Know your legal rights and the laws in Bangladesh that protect you from extortion.',
-    imageUrl: 'https://images.pexels.com/photos/5668859/pexels-photo-5668859.jpeg',
+    description:
+      'Know your legal rights and the laws in Bangladesh that protect you from extortion.',
+    imageUrl:
+      'https://images.pexels.com/photos/5668859/pexels-photo-5668859.jpeg',
     category: 'Legal',
   },
 ];
@@ -144,9 +155,9 @@ const RESOURCE_CONTENT = {
 
 export default function ResourceDetailScreen() {
   const { id } = useLocalSearchParams();
-  
+
   const resource = useMemo(() => {
-    return MOCK_RESOURCES.find(r => r.id === id) || null;
+    return MOCK_RESOURCES.find((r) => r.id === id) || null;
   }, [id]);
 
   const content = useMemo(() => {
@@ -165,7 +176,10 @@ export default function ResourceDetailScreen() {
         </View>
         <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundText}>Resource not found</Text>
-          <Pressable style={styles.backButton} onPress={() => router.push('/resources')}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.push('/(pages)/resources')}
+          >
             <Text style={styles.backButtonText}>Back to Resources</Text>
           </Pressable>
         </View>
@@ -196,14 +210,18 @@ export default function ResourceDetailScreen() {
 
         <View style={styles.contentContainer}>
           <View style={styles.resourceHeader}>
-            <BookOpen size={24} color={Colors.primary[600]} style={styles.titleIcon} />
+            <BookOpen
+              size={24}
+              color={Colors.primary[600]}
+              style={styles.titleIcon}
+            />
             <Text style={styles.title}>{resource.title}</Text>
           </View>
-          
+
           <Text style={styles.description}>{resource.description}</Text>
-          
+
           <View style={styles.divider} />
-          
+
           {content.map((item, index) => {
             if (item.type === 'paragraph') {
               return (
@@ -220,12 +238,13 @@ export default function ResourceDetailScreen() {
             } else if (item.type === 'bullet') {
               return (
                 <View key={index} style={styles.bulletList}>
-                  {item.items.map((bulletItem, bulletIndex) => (
-                    <View key={bulletIndex} style={styles.bulletItem}>
-                      <Text style={styles.bullet}>•</Text>
-                      <Text style={styles.bulletText}>{bulletItem}</Text>
-                    </View>
-                  ))}
+                  {Array.isArray(item.items) &&
+                    item.items.map((bulletItem, bulletIndex) => (
+                      <View key={bulletIndex} style={styles.bulletItem}>
+                        <Text style={styles.bullet}>•</Text>
+                        <Text style={styles.bulletText}>{bulletItem}</Text>
+                      </View>
+                    ))}
                 </View>
               );
             }
@@ -233,7 +252,7 @@ export default function ResourceDetailScreen() {
           })}
 
           <View style={styles.actionsContainer}>
-            <Pressable 
+            <Pressable
               style={styles.actionButton}
               onPress={() => router.push('/report')}
             >

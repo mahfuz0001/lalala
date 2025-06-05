@@ -1,5 +1,11 @@
 import { StyleSheet, Text, View, ScrollView, Pressable } from 'react-native';
-import { ArrowLeft, TriangleAlert as AlertTriangle, MapPin, Clock, Share2 } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  TriangleAlert as AlertTriangle,
+  MapPin,
+  Clock,
+  Share2,
+} from 'lucide-react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { AlertType } from '@/components/SafetyAlert';
@@ -32,9 +38,9 @@ const MOCK_ALERTS: AlertType[] = [
 
 export default function AlertDetailScreen() {
   const { id } = useLocalSearchParams();
-  
+
   const alert = useMemo(() => {
-    return MOCK_ALERTS.find(a => a.id === id) || null;
+    return MOCK_ALERTS.find((a) => a.id === id) || null;
   }, [id]);
 
   if (!alert) {
@@ -49,7 +55,10 @@ export default function AlertDetailScreen() {
         </View>
         <View style={styles.notFoundContainer}>
           <Text style={styles.notFoundText}>Alert not found</Text>
-          <Pressable style={styles.backToAlertsButton} onPress={() => router.push('/alerts')}>
+          <Pressable
+            style={styles.backToAlertsButton}
+            onPress={() => router.push('/alerts')}
+          >
             <Text style={styles.backToAlertsText}>Back to Alerts</Text>
           </Pressable>
         </View>
@@ -83,14 +92,18 @@ export default function AlertDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[
-        styles.header, 
-        { backgroundColor: getSeverityColor(alert.severity) }
-      ]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: getSeverityColor(alert.severity) },
+        ]}
+      >
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <ArrowLeft size={24} color={Colors.white} />
         </Pressable>
-        <Text style={styles.headerTitle}>{getSeverityText(alert.severity)}</Text>
+        <Text style={styles.headerTitle}>
+          {getSeverityText(alert.severity)}
+        </Text>
         <Pressable style={styles.shareButton}>
           <Share2 size={24} color={Colors.white} />
         </Pressable>
@@ -99,9 +112,9 @@ export default function AlertDetailScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.alertContent}>
           <View style={styles.alertHeader}>
-            <AlertTriangle 
-              size={24} 
-              color={getSeverityColor(alert.severity)} 
+            <AlertTriangle
+              size={24}
+              color={getSeverityColor(alert.severity)}
               style={styles.alertIcon}
             />
             <Text style={styles.alertMessage}>{alert.message}</Text>
@@ -111,11 +124,19 @@ export default function AlertDetailScreen() {
 
           <View style={styles.infoSection}>
             <View style={styles.infoItem}>
-              <MapPin size={20} color={Colors.neutral[600]} style={styles.infoIcon} />
+              <MapPin
+                size={20}
+                color={Colors.neutral[600]}
+                style={styles.infoIcon}
+              />
               <Text style={styles.infoText}>{alert.location}</Text>
             </View>
             <View style={styles.infoItem}>
-              <Clock size={20} color={Colors.neutral[600]} style={styles.infoIcon} />
+              <Clock
+                size={20}
+                color={Colors.neutral[600]}
+                style={styles.infoIcon}
+              />
               <Text style={styles.infoText}>{alert.timestamp}</Text>
             </View>
           </View>
@@ -146,13 +167,17 @@ export default function AlertDetailScreen() {
 
           <View style={styles.actionsSection}>
             <Pressable style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Report Similar Incident</Text>
+              <Text style={styles.actionButtonText}>
+                Report Similar Incident
+              </Text>
             </Pressable>
-            <Pressable 
+            <Pressable
               style={[styles.actionButton, styles.secondaryButton]}
-              onPress={() => router.push('/resources')}
+              onPress={() => router.push('/(pages)/resources')}
             >
-              <Text style={styles.secondaryButtonText}>View Safety Resources</Text>
+              <Text style={styles.secondaryButtonText}>
+                View Safety Resources
+              </Text>
             </Pressable>
           </View>
         </View>

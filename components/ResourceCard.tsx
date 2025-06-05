@@ -19,17 +19,14 @@ type ResourceCardProps = {
 export default function ResourceCard({ resource, onPress }: ResourceCardProps) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.container,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       onPress={() => onPress(resource)}
     >
       <View style={styles.imageContainer}>
         {resource.imageUrl ? (
-          <Image 
-            source={{ uri: resource.imageUrl }} 
-            style={styles.image} 
+          <Image
+            source={{ uri: resource.imageUrl }}
+            style={styles.image}
             resizeMode="cover"
           />
         ) : (

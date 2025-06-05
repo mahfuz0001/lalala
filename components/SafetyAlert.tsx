@@ -2,13 +2,16 @@ import React from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { TriangleAlert as AlertTriangle, X } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import dayjs from 'dayjs';
 
 export type AlertType = {
   id: string;
   message: string;
   severity: 'info' | 'warning' | 'danger';
-  location?: string;
-  timestamp: string;
+  location_address?: string | null;
+  radius?: number;
+  created_at: string;
+  expires_at?: string | null;
 };
 
 type SafetyAlertProps = {
@@ -17,7 +20,11 @@ type SafetyAlertProps = {
   onPress: (alert: AlertType) => void;
 };
 
-export default function SafetyAlert({ alert, onDismiss, onPress }: SafetyAlertProps) {
+export default function SafetyAlert({
+  alert,
+  onDismiss,
+  onPress,
+}: SafetyAlertProps) {
   const getAlertColors = () => {
     switch (alert.severity) {
       case 'danger':
@@ -43,6 +50,10 @@ export default function SafetyAlert({ alert, onDismiss, onPress }: SafetyAlertPr
   };
 
   const colors = getAlertColors();
+  const timestamp = dayjs(alert.created_at).format('MMM D, YYYY h:mm A');
+  const expires = alert.expires_at
+    ? dayjs(alert.expires_at).format('MMM D, YYYY h:mm A')
+    : null;
 
   return (
     <Pressable
@@ -60,11 +71,11 @@ export default function SafetyAlert({ alert, onDismiss, onPress }: SafetyAlertPr
         <AlertTriangle size={20} color={colors.icon} style={styles.icon} />
         <View style={styles.textContent}>
           <Text style={styles.message}>{alert.message}</Text>
-          {alert.location && (
-            <Text style={styles.location}>
-              {alert.location} • {alert.timestamp}
-            </Text>
-          )}
+          <Text style={styles.meta}>
+            {alert.location_address ? `${alert.location_address} • ` : ''}
+            Radius: {alert.radius ?? 500}m • {timestamp}
+          </Text>
+          {expires && <Text style={styles.expiry}>Expires: {expires}</Text>}
         </View>
       </View>
       <Pressable
@@ -109,10 +120,16 @@ const styles = StyleSheet.create({
     color: Colors.neutral[800],
     marginBottom: 4,
   },
-  location: {
+  meta: {
     fontFamily: 'Roboto-Regular',
     fontSize: 12,
     color: Colors.neutral[600],
+  },
+  expiry: {
+    fontFamily: 'Roboto-Regular',
+    fontSize: 11,
+    color: Colors.danger[600],
+    marginTop: 2,
   },
   dismissButton: {
     padding: 4,

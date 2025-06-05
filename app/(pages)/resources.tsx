@@ -1,5 +1,13 @@
 import { useState, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList, TextInput, Pressable, RefreshControl } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TextInput,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 import { Search, BookOpen } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import ResourceCard, { ResourceType } from '@/components/ResourceCard';
@@ -10,43 +18,55 @@ const MOCK_RESOURCES: ResourceType[] = [
   {
     id: '1',
     title: 'How to Identify Extortion Attempts',
-    description: 'Learn the common signs and tactics used in extortion attempts and how to respond safely.',
-    imageUrl: 'https://images.pexels.com/photos/6964140/pexels-photo-6964140.jpeg',
+    description:
+      'Learn the common signs and tactics used in extortion attempts and how to respond safely.',
+    imageUrl:
+      'https://images.pexels.com/photos/6964140/pexels-photo-6964140.jpeg',
     category: 'Education',
   },
   {
     id: '2',
     title: 'Legal Rights When Facing Extortion',
-    description: 'Know your legal rights and the laws in Bangladesh that protect you from extortion.',
-    imageUrl: 'https://images.pexels.com/photos/5668859/pexels-photo-5668859.jpeg',
+    description:
+      'Know your legal rights and the laws in Bangladesh that protect you from extortion.',
+    imageUrl:
+      'https://images.pexels.com/photos/5668859/pexels-photo-5668859.jpeg',
     category: 'Legal',
   },
   {
     id: '3',
     title: 'Community Support Networks',
-    description: 'Connect with local support networks that can help you if you face extortion threats.',
-    imageUrl: 'https://images.pexels.com/photos/3184396/pexels-photo-3184396.jpeg',
+    description:
+      'Connect with local support networks that can help you if you face extortion threats.',
+    imageUrl:
+      'https://images.pexels.com/photos/3184396/pexels-photo-3184396.jpeg',
     category: 'Community',
   },
   {
     id: '4',
     title: 'Safely Documenting Extortion',
-    description: 'Learn how to safely document extortion attempts to report to authorities.',
-    imageUrl: 'https://images.pexels.com/photos/3760809/pexels-photo-3760809.jpeg',
+    description:
+      'Learn how to safely document extortion attempts to report to authorities.',
+    imageUrl:
+      'https://images.pexels.com/photos/3760809/pexels-photo-3760809.jpeg',
     category: 'Safety',
   },
   {
     id: '5',
     title: 'Business Protection Strategies',
-    description: 'Strategies for business owners to protect themselves from systematic extortion.',
-    imageUrl: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg',
+    description:
+      'Strategies for business owners to protect themselves from systematic extortion.',
+    imageUrl:
+      'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg',
     category: 'Business',
   },
   {
     id: '6',
     title: 'Emergency Contact Directory',
-    description: 'A comprehensive directory of emergency contacts and resources across Bangladesh.',
-    imageUrl: 'https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg',
+    description:
+      'A comprehensive directory of emergency contacts and resources across Bangladesh.',
+    imageUrl:
+      'https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg',
     category: 'Directory',
   },
 ];
@@ -60,7 +80,9 @@ export default function ResourcesScreen() {
     ? resources.filter(
         (resource) =>
           resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          resource.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           resource.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : resources;
@@ -82,14 +104,24 @@ export default function ResourcesScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <BookOpen size={24} color={Colors.primary[700]} style={styles.titleIcon} />
+          <BookOpen
+            size={24}
+            color={Colors.primary[700]}
+            style={styles.titleIcon}
+          />
           <Text style={styles.title}>Safety Resources</Text>
         </View>
-        <Text style={styles.subtitle}>Educational materials to help prevent extortion</Text>
+        <Text style={styles.subtitle}>
+          Educational materials to help prevent extortion
+        </Text>
       </View>
 
       <View style={styles.searchContainer}>
-        <Search size={20} color={Colors.neutral[400]} style={styles.searchIcon} />
+        <Search
+          size={20}
+          color={Colors.neutral[400]}
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search resources..."
@@ -98,7 +130,10 @@ export default function ResourcesScreen() {
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
-          <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
+          <Pressable
+            onPress={() => setSearchQuery('')}
+            style={styles.clearButton}
+          >
             <Text style={styles.clearButtonText}>Clear</Text>
           </Pressable>
         )}

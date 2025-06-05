@@ -1,6 +1,13 @@
-import { useState, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, Pressable } from 'react-native';
-import { RefreshControl } from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  RefreshControl,
+  Pressable,
+  Alert,
+} from 'react-native';
 import {
   MapPin,
   TriangleAlert as AlertTriangle,
@@ -11,62 +18,53 @@ import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import EmergencyButton from '@/components/EmergencyButton';
 import SafetyAlert, { AlertType } from '@/components/SafetyAlert';
-
-// Mock data
-const MOCK_ALERTS: AlertType[] = [
-  {
-    id: '1',
-    message: 'Reports of extortion attempts near Gulshan Avenue',
-    severity: 'danger',
-    location: 'Gulshan, Dhaka',
-    timestamp: '10 mins ago',
-  },
-  {
-    id: '2',
-    message: 'Be cautious of suspicious individuals near Mirpur Road bus stops',
-    severity: 'warning',
-    location: 'Mirpur, Dhaka',
-    timestamp: '1 hour ago',
-  },
-  {
-    id: '3',
-    message: 'Police increased patrols in Uttara Sector 13',
-    severity: 'info',
-    location: 'Uttara, Dhaka',
-    timestamp: '2 hours ago',
-  },
-];
+import { supabase } from '@/lib/supabase';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function HomeScreen() {
-  const [alerts, setAlerts] = useState<AlertType[]>(MOCK_ALERTS);
+  const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const fetchAlerts = async () => {
+    const { data, error } = await supabase
+      .from('alerts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch alerts:', error.message);
+      Alert.alert('Error', 'Could not load alerts. Please try again.');
+    } else {
+      setAlerts(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate fetch delay
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    fetchAlerts().finally(() => setRefreshing(false));
   }, []);
 
   const handleEmergency = () => {
-    // Handle emergency button press
-    alert('Emergency services notified. Stay safe.');
-    // In a real app, this would contact emergency services or trusted contacts
+    Alert.alert(
+      'Emergency Triggered',
+      'Emergency services notified. Stay safe.'
+    );
+    // Here you might send a signal to Supabase or a webhook.
   };
 
   const dismissAlert = (id: string) => {
-    setAlerts(alerts.filter((alert) => alert.id !== id));
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
   };
 
   const viewAlertDetails = (alert: AlertType) => {
-    // Navigate to alert details
     router.push(`/alerts/${alert.id}`);
   };
 
-  const navigateToReportScreen = () => {
-    router.push('/report');
-  };
+  const { user } = useUser();
 
   return (
     <View style={styles.container}>
@@ -84,6 +82,7 @@ export default function HomeScreen() {
               <MapPin size={16} color={Colors.primary[600]} />
               <Text style={styles.location}>Dhaka, Bangladesh</Text>
             </View>
+            {/* <Text>Hello {user?.emailAddresses[0].emailAddress}</Text> */}
           </View>
           <View style={styles.safetyIndicator}>
             <AlertTriangle size={16} color={Colors.danger[500]} />
@@ -104,6 +103,7 @@ export default function HomeScreen() {
               <Text style={styles.seeAll}>See All</Text>
             </Pressable>
           </View>
+
           {alerts.length > 0 ? (
             alerts.map((alert) => (
               <SafetyAlert
@@ -126,7 +126,7 @@ export default function HomeScreen() {
           <View style={styles.actionsGrid}>
             <Pressable
               style={styles.actionButton}
-              onPress={navigateToReportScreen}
+              onPress={() => router.push('/report')}
             >
               <View style={styles.actionIcon}>
                 <AlertTriangle size={24} color={Colors.white} />
@@ -136,7 +136,7 @@ export default function HomeScreen() {
 
             <Pressable
               style={styles.actionButton}
-              onPress={() => router.push('/resources')}
+              onPress={() => router.push('/(pages)/resources')}
             >
               <View
                 style={[
@@ -156,18 +156,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.neutral[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 24,
-  },
+  container: { flex: 1, backgroundColor: Colors.neutral[100] },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 60, paddingBottom: 24 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -180,10 +171,7 @@ const styles = StyleSheet.create({
     color: Colors.primary[800],
     marginBottom: 4,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  locationContainer: { flexDirection: 'row', alignItems: 'center' },
   location: {
     fontFamily: 'Roboto-Regular',
     fontSize: 14,
@@ -206,9 +194,7 @@ const styles = StyleSheet.create({
     color: Colors.danger[700],
     marginLeft: 4,
   },
-  section: {
-    marginBottom: 24,
-  },
+  section: { marginBottom: 24 },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -239,9 +225,7 @@ const styles = StyleSheet.create({
     color: Colors.neutral[500],
     marginTop: 8,
   },
-  quickActions: {
-    marginBottom: 16,
-  },
+  quickActions: { marginBottom: 16 },
   actionsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -254,10 +238,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     shadowColor: Colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,

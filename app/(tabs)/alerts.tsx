@@ -1,83 +1,67 @@
-import { useState, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  RefreshControl,
+  Alert,
+} from 'react-native';
 import { MapPin, Filter } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import SafetyAlert, { AlertType } from '@/components/SafetyAlert';
-
-// Mock data with more alerts
-const MOCK_ALERTS: AlertType[] = [
-  {
-    id: '1',
-    message: 'Reports of extortion attempts near Gulshan Avenue',
-    severity: 'danger',
-    location: 'Gulshan, Dhaka',
-    timestamp: '10 mins ago',
-  },
-  {
-    id: '2',
-    message: 'Be cautious of suspicious individuals near Mirpur Road bus stops',
-    severity: 'warning',
-    location: 'Mirpur, Dhaka',
-    timestamp: '1 hour ago',
-  },
-  {
-    id: '3',
-    message: 'Police increased patrols in Uttara Sector 13',
-    severity: 'info',
-    location: 'Uttara, Dhaka',
-    timestamp: '2 hours ago',
-  },
-  {
-    id: '4',
-    message: 'Recent extortion incidents reported at Farmgate market',
-    severity: 'danger',
-    location: 'Farmgate, Dhaka',
-    timestamp: '3 hours ago',
-  },
-  {
-    id: '5',
-    message: 'Stay vigilant around Motijheel commercial area',
-    severity: 'warning',
-    location: 'Motijheel, Dhaka',
-    timestamp: '5 hours ago',
-  },
-  {
-    id: '6',
-    message: 'Community watch program starting in Dhanmondi',
-    severity: 'info',
-    location: 'Dhanmondi, Dhaka',
-    timestamp: '6 hours ago',
-  },
-  {
-    id: '7',
-    message: 'Multiple reports of extortion at CNG stations',
-    severity: 'danger',
-    location: 'Mohammadpur, Dhaka',
-    timestamp: 'Yesterday',
-  },
-];
+import { supabase } from '@/lib/supabase';
 
 export default function AlertsScreen() {
-  const [alerts, setAlerts] = useState<AlertType[]>(MOCK_ALERTS);
+  const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const fetchAlerts = async () => {
+    const { data, error } = await supabase.from('alerts').select('*');
+    // .eq('is_active', true)
+    // .order('created_at', { ascending: false });
+
+    if (error) {
+      Alert.alert('Error', 'Failed to load alerts');
+      console.error('Error fetching alerts:', error.message);
+      return;
+    }
+
+    const formatted = data.map((alert) => ({
+      id: alert.id,
+      message: alert.message,
+      severity: alert.severity,
+      location: alert.location_address || 'Unknown location',
+      latitude: alert.location_lat,
+      longitude: alert.location_lng,
+      radius: alert.radius || 0,
+      expires_at: alert.expires_at || null,
+      created_at: timeAgo(alert.created_at),
+      is_active: true,
+    }));
+
+    setAlerts(formatted);
+  };
+
+  // console.log('Alertss:', alerts);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate fetch delay
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    fetchAlerts().finally(() => setRefreshing(false));
   }, []);
 
   const dismissAlert = (id: string) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
   };
 
   const viewAlertDetails = (alert: AlertType) => {
-    // In a real app, navigate to alert details
     router.push(`/alerts/${alert.id}`);
   };
+
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -157,3 +141,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
+
+// Relative time display
+function timeAgo(dateString: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+  if (diff < 60) return `${diff} sec ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  return new Date(dateString).toLocaleDateString();
+}

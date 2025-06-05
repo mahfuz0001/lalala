@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Pressable, Platform } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { Shield, TriangleAlert as AlertTriangle, Users } from 'lucide-react-native';
+import {
+  Shield,
+  TriangleAlert as AlertTriangle,
+  Users,
+} from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { supabase } from '@/lib/supabase';
 
@@ -31,7 +35,9 @@ const DHAKA_REGION = {
 };
 
 export default function MapScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,11 +53,11 @@ export default function MapScreen() {
 
       const location = await Location.getCurrentPositionAsync({});
       setLocation(location);
-      
+
       // Initial fetch of incidents and active users
       fetchNearbyIncidents(location.coords.latitude, location.coords.longitude);
       fetchActiveUsers(location.coords.latitude, location.coords.longitude);
-      
+
       setIsLoading(false);
     })();
   }, []);
@@ -87,12 +93,11 @@ export default function MapScreen() {
   }, [location]);
 
   const fetchNearbyIncidents = async (lat: number, lng: number) => {
-    const { data, error } = await supabase
-      .rpc('nearby_incidents', {
-        lat,
-        lng,
-        radius_meters: 5000 // Increased radius to see more incidents
-      });
+    const { data, error } = await supabase.rpc('nearby_incidents', {
+      lat,
+      lng,
+      radius_meters: 5000, // Increased radius to see more incidents
+    });
 
     if (data) {
       setIncidents(data);
@@ -100,12 +105,11 @@ export default function MapScreen() {
   };
 
   const fetchActiveUsers = async (lat: number, lng: number) => {
-    const { data, error } = await supabase
-      .rpc('nearby_active_users', {
-        lat,
-        lng,
-        radius_meters: 5000
-      });
+    const { data, error } = await supabase.rpc('nearby_active_users', {
+      lat,
+      lng,
+      radius_meters: 5000,
+    });
 
     if (data) {
       setActiveUsers(data);
@@ -139,12 +143,16 @@ export default function MapScreen() {
         ref={mapRef}
         style={styles.map}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-        initialRegion={location ? {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        } : DHAKA_REGION}
+        initialRegion={
+          location
+            ? {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }
+            : DHAKA_REGION
+        }
         showsUserLocation
         showsMyLocationButton
         showsCompass
@@ -157,12 +165,14 @@ export default function MapScreen() {
                 latitude: incident.location_lat,
                 longitude: incident.location_lng,
               }}
-              onPress={() => router.push(`/incidents/${incident.id}`)}
+              // onPress={() => router.push(`/incidents/${incident.id}`)}
             >
-              <View style={[
-                styles.marker,
-                { backgroundColor: getSeverityColor(incident.severity) }
-              ]}>
+              <View
+                style={[
+                  styles.marker,
+                  { backgroundColor: getSeverityColor(incident.severity) },
+                ]}
+              >
                 <AlertTriangle size={16} color={Colors.white} />
               </View>
             </Marker>

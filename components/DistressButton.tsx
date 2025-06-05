@@ -1,20 +1,23 @@
 import { StyleSheet, Pressable, View, Text, Animated } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
-import { Shield, ShieldAlert } from 'lucide-react-native';
+import { Shield, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/Colors';
+import { sendDistressSignal } from '@/lib/supabase';
+import { useLocation } from '@/hooks/useLocation';
 
-type EmergencyButtonProps = {
-  onTrigger: () => void;
+type DistressButtonProps = {
+  onSignalSent: () => void;
 };
 
-export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
+export default function DistressButton({ onSignalSent }: DistressButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
   const [longPressProgress, setLongPressProgress] = useState(0);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { location } = useLocation();
 
   useEffect(() => {
     if (isPressed) {
@@ -24,7 +27,7 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
           const newValue = prev + 0.033; // 3% increase every 100ms
           if (newValue >= 1) {
             clearInterval(progressInterval.current!);
-            triggerEmergency();
+            triggerDistressSignal();
             return 1;
           }
           return newValue;
@@ -70,11 +73,23 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
     };
   }, [isPressed, scaleAnim, progressAnim]);
 
-  const triggerEmergency = () => {
+  const triggerDistressSignal = async () => {
+    if (!location) return;
+
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    onTrigger();
+
+    try {
+      await sendDistressSignal(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+      onSignalSent();
+    } catch (error) {
+      console.error('Failed to send distress signal:', error);
+    }
+
     setIsPressed(false);
   };
 
@@ -85,7 +100,7 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Press and hold for emergency</Text>
+      <Text style={styles.label}>Hold for Emergency Signal</Text>
       <Animated.View
         style={[styles.buttonWrapper, { transform: [{ scale: scaleAnim }] }]}
       >
@@ -94,7 +109,7 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
           onPressIn={() => {
             setIsPressed(true);
             if (Platform.OS !== 'web') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             }
           }}
           onPressOut={() => {
@@ -103,7 +118,7 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
         >
           <View style={styles.iconContainer}>
             {isPressed ? (
-              <ShieldAlert size={32} color={Colors.white} />
+              <AlertTriangle size={32} color={Colors.white} />
             ) : (
               <Shield size={32} color={Colors.white} />
             )}
@@ -124,8 +139,8 @@ export default function EmergencyButton({ onTrigger }: EmergencyButtonProps) {
       </Animated.View>
       <Text style={styles.hintText}>
         {longPressProgress > 0
-          ? `Hold ${Math.floor(longPressProgress * 100)}%`
-          : 'SOS will alert authorities'}
+          ? `Sending SOS ${Math.floor(longPressProgress * 100)}%`
+          : 'Emergency services will be notified'}
       </Text>
     </View>
   );
