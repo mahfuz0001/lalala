@@ -29,8 +29,8 @@ export function useLocation() {
       subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 5,
+          timeInterval: 15000, // Update every 15 seconds
+          distanceInterval: 10, // Or when moved 10 meters
         },
         async (newLocation) => {
           setLocation(newLocation);
